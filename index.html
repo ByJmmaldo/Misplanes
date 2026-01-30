@@ -1,444 +1,220 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<title>MaldoFit NEON</title>
-<style>
-:root { --bg:#050505; --card:#121212; --text:#fff; --dim:#666; --acc:#00f0ff; --ok:#00ff66; --bad:#ff0055; --warn:#ffcc00; }
-body { background:var(--bg); color:var(--text); font-family:'Segoe UI',sans-serif; margin:0; padding:0 0 80px 0; -webkit-tap-highlight-color:transparent; }
-/* UTILS */
-.flex { display:flex; align-items:center; } .jb { justify-content:space-between; } .ac { align-items:center; } .col { flex-direction:column; }
-.g10 { gap:10px; } .p20 { padding:20px; } .hide { display:none!important; }
-/* HEADER */
-.head { position:sticky; top:0; background:rgba(5,5,5,0.95); backdrop-filter:blur(10px); z-index:100; border-bottom:1px solid #222; }
-h1 { margin:0; font-size:20px; font-weight:800; letter-spacing:-0.5px; background:linear-gradient(45deg, var(--acc), #bc13fe); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-.btn-ghost { border:1px solid var(--acc); color:var(--acc); background:0 0; padding:5px 12px; border-radius:20px; font-size:11px; font-weight:700; cursor:pointer; }
-/* TABS */
-.tabs { overflow-x:auto; padding:15px 20px; gap:8px; scrollbar-width:none; -ms-overflow-style:none; } .tabs::-webkit-scrollbar { display:none; }
-.tab { background:#1a1a1a; border:1px solid #333; padding:8px 16px; border-radius:20px; color:#888; font-size:13px; font-weight:600; white-space:nowrap; transition:.2s; cursor:pointer; }
-.tab.active { background:var(--acc); color:#000; border-color:var(--acc); box-shadow:0 0 15px rgba(0,240,255,0.2); }
-/* DASH */
-.dash { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; padding:0 20px 15px; }
-.stat { background:var(--card); border:1px solid #222; padding:10px 5px; border-radius:10px; text-align:center; }
-.s-val { font-size:13px; font-weight:800; display:block; }
-.s-lbl { font-size:9px; color:var(--dim); text-transform:uppercase; margin-top:2px; }
-.bar { height:3px; background:#333; margin-top:5px; border-radius:2px; overflow:hidden; }
-.fill { height:100%; width:0%; transition:.3s; }
-/* MEALS */
-.card { background:var(--card); border:1px solid #222; border-radius:12px; padding:15px; margin-bottom:10px; position:relative; }
-.c-head { font-size:10px; font-weight:800; color:var(--acc); text-transform:uppercase; margin-bottom:4px; }
-.c-name { font-size:15px; font-weight:600; margin-bottom:4px; line-height:1.3; padding-right:25px; }
-.c-det { font-size:11px; color:#888; font-family:monospace; }
-.c-ing { font-size:12px; color:#555; margin-top:8px; padding-top:8px; border-top:1px solid #222; line-height:1.4; }
-.act { position:absolute; top:12px; right:12px; width:26px; height:26px; border-radius:50%; border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; font-weight:bold; }
-.add { background:var(--ok); color:#000; } .del { background:0 0; color:var(--bad); font-size:20px; top:10px; right:10px; }
-/* MODAL */
-.modal { position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:200; align-items:center; justify-content:center; }
-.m-box { background:#111; width:90%; max-width:400px; max-height:85vh; overflow-y:auto; padding:20px; border-radius:20px; border:1px solid #333; }
-.inp-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
-.inp-lbl { font-size:10px; color:var(--dim); text-transform:uppercase; display:block; margin-bottom:4px; font-weight:700; }
-.inp { width:100%; background:#000; border:1px solid #333; color:#fff; padding:10px; border-radius:8px; font-size:14px; outline:none; }
-.btn { width:100%; padding:12px; border-radius:10px; border:none; font-weight:800; cursor:pointer; margin-top:10px; text-transform:uppercase; font-size:13px; }
-.btn-save { background:var(--acc); color:#000; }
-.btn-close { background:0 0; color:#555; }
-/* TABLE */
-.grid-days { display:grid; gap:8px; margin-top:15px; }
-.g-row { display:grid; grid-template-columns:30px 1fr 1fr 1fr 1fr; gap:5px; align-items:center; }
-.g-cell input { width:100%; background:#000; border:1px solid #333; color:#fff; padding:5px; text-align:center; border-radius:4px; font-size:11px; }
-/* NAV */
-.nav { position:fixed; bottom:0; width:100%; background:rgba(10,10,10,0.95); border-top:1px solid #222; display:flex; justify-content:space-around; padding:10px 0 25px; z-index:100; backdrop-filter:blur(10px); }
-.n-item { background:0 0; border:none; color:#555; display:flex; flex-direction:column; align-items:center; gap:3px; font-size:9px; font-weight:700; cursor:pointer; }
-.n-item.active { color:var(--acc); } .icon { font-size:18px; }
-/* SEARCH */
-.search-area { position:sticky; top:61px; background:var(--bg); z-index:90; padding:10px 20px; border-bottom:1px solid #111; }
-.search-inp { width:100%; background:#1a1a1a; border:1px solid #333; padding:10px; border-radius:10px; color:#fff; font-size:14px; outline:none; }
-.tags { display:flex; gap:8px; overflow-x:auto; margin-top:10px; scrollbar-width:none; padding-bottom:5px; }
-.tag { padding:5px 12px; background:#222; border-radius:15px; font-size:11px; color:#aaa; white-space:nowrap; cursor:pointer; border:1px solid transparent; }
-.tag.active { background:var(--acc); color:#000; }
-@media print { .nav,.header,.tabs,.add,.del,.search-area { display:none!important; } .view { display:block!important; } body{background:#fff;color:#000} .card{border:1px solid #ccc;background:#fff;color:#000;break-inside:avoid} .c-ing{color:#000} }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>MaldoFit PRO</title>
+    <script src="data.js"></script> 
+    <style>
+        :root {
+            --bg: #000000; --card: #111111; --text: #ffffff; --sub: #888888;
+            --border: #222222; --accent: #00f2ff; /* Azul Neon */
+            --ok: #00ff66; --bad: #ff0055;
+        }
+        body { background: var(--bg); color: var(--text); font-family: -apple-system, system-ui, sans-serif; margin: 0; padding: 0 0 90px 0; -webkit-tap-highlight-color: transparent; }
+        
+        /* HEADER */
+        .header { position: sticky; top: 0; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        h1 { margin: 0; font-size: 22px; font-weight: 900; letter-spacing: -1px; background: linear-gradient(45deg, var(--accent), #bc13fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .btn-ghost { background: none; border: 1px solid var(--accent); color: var(--accent); padding: 5px 12px; border-radius: 15px; font-size: 11px; font-weight: 700; cursor: pointer; }
+
+        /* TABS DIAS */
+        .days-wrap { overflow-x: auto; padding: 15px 20px; display: flex; gap: 10px; scrollbar-width: none; }
+        .day-pill { background: var(--card); border: 1px solid var(--border); padding: 8px 16px; border-radius: 20px; color: var(--sub); font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: 0.2s; }
+        .day-pill.active { background: var(--accent); color: #000; border-color: var(--accent); box-shadow: 0 0 15px rgba(0, 242, 255, 0.3); }
+
+        /* DASHBOARD MACROS */
+        .dash { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 0 20px 20px; }
+        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 10px 5px; text-align: center; }
+        .stat-val { font-size: 14px; font-weight: 800; display: block; }
+        .stat-lbl { font-size: 10px; color: var(--sub); text-transform: uppercase; margin-top: 3px; }
+        .bar-bg { height: 3px; background: #333; margin-top: 5px; border-radius: 2px; overflow: hidden; }
+        .bar-fill { height: 100%; width: 0%; transition: 0.3s; }
+
+        /* LISTA COMIDAS */
+        .list { padding: 0 20px; }
+        .item { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 15px; margin-bottom: 10px; position: relative; }
+        .i-cat { font-size: 10px; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 5px; }
+        .i-name { font-size: 15px; font-weight: 600; margin-bottom: 5px; line-height: 1.3; padding-right: 30px; }
+        .i-meta { font-size: 11px; color: var(--sub); font-family: monospace; }
+        .i-ing { font-size: 12px; color: #666; margin-top: 8px; padding-top: 8px; border-top: 1px solid #222; line-height: 1.4; }
+        .btn-act { position: absolute; top: 12px; right: 12px; width: 28px; height: 28px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .add { background: var(--ok); color: #000; font-weight: bold; font-size: 18px; }
+        .del { background: transparent; color: var(--bad); font-size: 22px; top: 10px; right: 10px; }
+
+        /* BUSCADOR */
+        .search-area { position: sticky; top: 63px; background: var(--bg); z-index: 90; padding: 10px 20px; border-bottom: 1px solid #111; }
+        .search-inp { width: 100%; background: #1a1a1a; border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 10px; font-size: 15px; outline: none; }
+        .cats { display: flex; gap: 8px; overflow-x: auto; margin-top: 10px; padding-bottom: 5px; scrollbar-width: none; }
+        .tag { padding: 6px 12px; background: #222; border-radius: 15px; font-size: 11px; color: #aaa; white-space: nowrap; border: 1px solid transparent; cursor: pointer; }
+        .tag.active { background: var(--accent); color: #000; }
+
+        /* MODAL */
+        #modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .m-content { background: var(--card); width: 90%; max-width: 400px; padding: 25px; border-radius: 20px; border: 1px solid var(--border); max-height: 85vh; overflow-y: auto; }
+        .inp-grp { margin-bottom: 15px; }
+        .inp-lbl { display: block; color: var(--sub); font-size: 11px; margin-bottom: 5px; text-transform: uppercase; font-weight: 700; }
+        .inp { width: 100%; background: #000; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 8px; font-size: 15px; }
+        .btn-save { width: 100%; background: var(--accent); color: #000; padding: 12px; border-radius: 10px; border: none; font-weight: 800; text-transform: uppercase; margin-top: 10px; cursor: pointer; }
+
+        /* GRID DIAS */
+        .grid-days { display: grid; gap: 8px; margin-top: 20px; }
+        .g-row { display: grid; grid-template-columns: 40px 1fr 1fr 1fr 1fr; gap: 5px; align-items: center; }
+        .g-inp { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 6px; text-align: center; border-radius: 4px; font-size: 12px; }
+
+        /* NAV */
+        .nav { position: fixed; bottom: 0; width: 100%; background: rgba(10,10,10,0.95); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0 25px; z-index: 1000; backdrop-filter: blur(10px); }
+        .n-btn { background: 0 0; border: none; color: #555; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; cursor: pointer; }
+        .n-btn.active { color: var(--accent); } .icon { font-size: 20px; }
+
+        .view { display: none; } .view.active { display: block; }
+        @media print { .nav, .header, .days-wrap, .add, .del, .search-area, .btn-ghost { display: none!important; } .view { display: block!important; } body { background: #fff; color: #000; } .item { border: 1px solid #ccc; background: #fff; color: #000; break-inside: avoid; } }
+    </style>
 </head>
 <body>
 
-<div id="v-home" class="view">
-    <div class="header flex jb"><h1>MaldoFit</h1><button class="btn-ghost" onclick="toggleModal(true)">OBJETIVOS</button></div>
-    <div class="tabs flex" id="day-tabs"></div>
+<div id="v-home" class="view active">
+    <div class="header"><h1>MaldoFit</h1><button class="btn-ghost" onclick="toggleModal(true)">OBJETIVOS</button></div>
+    <div class="days-wrap" id="day-tabs"></div>
     <div class="dash">
-        <div class="stat"><span class="s-val" id="dk">0</span><span class="s-lbl">Kcal</span><div class="bar-bg"><div id="bk" class="fill" style="background:#fff"></div></div></div>
-        <div class="stat"><span class="s-val" id="dp">0</span><span class="s-lbl">Prot</span><div class="bar-bg"><div id="bp" class="fill" style="background:var(--bad)"></div></div></div>
-        <div class="stat"><span class="s-val" id="dc">0</span><span class="s-lbl">Carb</span><div class="bar-bg"><div id="bc" class="fill" style="background:var(--warn)"></div></div></div>
-        <div class="stat"><span class="s-val" id="df">0</span><span class="s-lbl">Grasa</span><div class="bar-bg"><div id="bf" class="fill" style="background:var(--ok)"></div></div></div>
+        <div class="stat"><span class="val" id="dk">0</span><span class="lbl">Kcal</span><div class="bar-bg"><div id="bk" class="fill" style="background:#fff"></div></div></div>
+        <div class="stat"><span class="val" id="dp">0</span><span class="lbl">Prot</span><div class="bar-bg"><div id="bp" class="fill" style="background:#ff2a6d"></div></div></div>
+        <div class="stat"><span class="val" id="dc">0</span><span class="lbl">Carb</span><div class="bar-bg"><div id="bc" class="fill" style="background:#ffd500"></div></div></div>
+        <div class="stat"><span class="val" id="df">0</span><span class="lbl">Grasa</span><div class="bar-bg"><div id="bf" class="fill" style="background:#0aff60"></div></div></div>
     </div>
     <div id="plan-list" class="list"></div>
 </div>
 
-<div id="v-lib" class="view hide">
+<div id="v-lib" class="view">
     <div class="header"><h1>Alimentos</h1></div>
     <div class="search-area">
-        <input type="text" id="search" class="search-inp" placeholder="Buscar plato..." onkeyup="renderLib()">
-        <div class="tags" id="cat-tags"></div>
+        <input type="text" id="search" class="search-inp" placeholder="Buscar..." onkeyup="renderLib()">
+        <div class="cats">
+            <div class="tag active" onclick="setCat('Desayuno',this)">Desayuno</div>
+            <div class="tag" onclick="setCat('Tentempié',this)">Media Mañana</div>
+            <div class="tag" onclick="setCat('Comida',this)">Comida</div>
+            <div class="tag" onclick="setCat('Merienda',this)">Merienda</div>
+            <div class="tag" onclick="setCat('Cena',this)">Cena</div>
+        </div>
     </div>
     <div id="lib-list" class="list" style="padding-bottom:100px"></div>
 </div>
 
-<div id="modal" class="modal hide">
+<div id="modal">
     <div class="m-box">
-        <h2 style="color:var(--acc);margin-top:0">Configuración</h2>
-        <div class="inp-row">
-            <div><label class="inp-lbl">Peso</label><input type="number" id="w" class="inp" value="80"></div>
-            <div><label class="inp-lbl">Altura</label><input type="number" id="h" class="inp" value="180"></div>
+        <h2 style="color:var(--accent);margin-top:0">Configuración</h2>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
+            <div class="inp-grp"><label class="inp-lbl">Peso</label><input type="number" id="w" class="inp" value="80"></div>
+            <div class="inp-grp"><label class="inp-lbl">Altura</label><input type="number" id="h" class="inp" value="180"></div>
         </div>
-        <div class="inp-row">
-            <div><label class="inp-lbl">Edad</label><input type="number" id="a" class="inp" value="30"></div>
-            <div><label class="inp-lbl">Sexo</label><select id="s" class="inp"><option value="m">H</option><option value="f">M</option></select></div>
-        </div>
-        <div class="grp" style="margin-bottom:15px"><label class="inp-lbl">Actividad</label><select id="act" class="inp"><option value="1.2">Sedentario</option><option value="1.55" selected>CrossFit (3-5d)</option><option value="1.725">Alto</option></select></div>
-        <div class="grp"><label class="inp-lbl">Objetivo Global</label><select id="goal" class="inp"><option value="-0.2">Definición Agresiva</option><option value="0">Mantenimiento</option><option value="0.1">Volumen</option></select></div>
-        <button class="btn btn-save" onclick="calcBase()">Auto-Calcular</button>
+        <div class="inp-grp"><label class="inp-lbl">Edad</label><input type="number" id="a" class="inp" value="30"></div>
+        <div class="inp-grp"><label class="inp-lbl">Sexo</label><select id="s" class="inp"><option value="m">Hombre</option><option value="f">Mujer</option></select></div>
+        <div class="inp-grp"><label class="inp-lbl">Actividad</label><select id="act" class="inp"><option value="1.2">Sedentario</option><option value="1.55" selected>CrossFit (3-5d)</option><option value="1.725">Alto</option></select></div>
+        <div class="inp-grp"><label class="inp-lbl">Objetivo</label><select id="goal" class="inp"><option value="-0.2">Definición (-20%)</option><option value="0">Mantenimiento</option><option value="0.1">Volumen (+10%)</option></select></div>
+        <button class="btn-save" onclick="calc()">Auto-Calcular</button>
         <hr style="border:0;border-top:1px solid #333;margin:20px 0">
-        <h3 style="margin:0 0 10px;font-size:14px">Ajuste Manual Diario</h3>
-        <div class="grid-days" id="grid-days"></div>
-        <button class="btn btn-save" onclick="saveTargets()">Guardar Cambios</button>
-        <button class="btn btn-close" onclick="toggleModal(false)">Cerrar</button>
+        <label class="inp-lbl" style="color:#fff">Ajuste Manual por Día</label>
+        <div id="grid-days" class="grid-days"></div>
+        <button class="btn-save" onclick="saveTargets()" style="background:#333;margin-top:20px">Guardar Cambios</button>
+        <button onclick="toggleModal(false)" style="width:100%;padding:15px;background:0 0;border:none;color:#666;margin-top:5px">Cerrar</button>
     </div>
 </div>
 
 <div class="nav">
-    <button class="n-item active" onclick="nav('v-home',this)"><span class="icon">📅</span>PLAN</button>
-    <button class="n-item" onclick="nav('v-lib',this)"><span class="icon">🍔</span>COMIDAS</button>
-    <button class="n-item" onclick="window.print()"><span class="icon">🖨️</span>PDF</button>
+    <button class="n-btn active" onclick="go('v-home',this)"><span class="icon">📅</span>Plan</button>
+    <button class="n-btn" onclick="go('v-lib',this)"><span class="icon">🍔</span>Alimentos</button>
+    <button class="n-btn" onclick="window.print()"><span class="icon">🖨️</span>PDF</button>
 </div>
 
 <script>
-// FORMATO COMPRIMIDO: [id, tipo, nombre, kcal, p, c, f, ingredientes]
-const DB = [
-[1,"Desayuno","Desayuno Completo Pavo",781,30,120,20,"Leche, Pan, Pavo, Queso, Plátano"],
-[2,"Tentempié","Yogur Griego Granada",335,11,46,14,"Yogur, Avellana, Granada"],
-[3,"Comida","Alubias con Acelgas",329,16,52,6,"Alubias, Patata, Acelgas"],
-[4,"Comida","Pollo Asado",495,93,0,12,"Pollo asado"],
-[5,"Merienda","Pan Centeno Hummus",192,6,37,2,"Pan, Hummus, Naranja"],
-[6,"Merienda","Bocadillo Pavo",129,7,21,1,"Pan, Tomate, Pavo"],
-[7,"Cena","Tortilla Espinacas",166,13,2,11,"Huevo, Espinaca, Queso"],
-[8,"Desayuno","Avena y Tostada",530,20,80,15,"Avena, Pan, Pavo, Aceite"],
-[9,"Tentempié","Bocadillo Bonito",305,20,37,7,"Pan, Bonito, Tomate"],
-[10,"Comida","Espaguetis Pavo",340,14,20,23,"Espagueti, Yogur, Pavo"],
-[11,"Comida","Salmón Zanahoria",581,56,9,33,"Salmón, Zanahoria, Maíz"],
-[12,"Merienda","Mandarina",63,1,15,0,"Mandarina"],
-[13,"Cena","Atún Berenjena",276,43,9,6,"Atún, Berenjena"],
-[14,"Tentempié","Bocadillo Sardinas",325,18,37,10,"Pan, Sardinas, Tomate"],
-[15,"Comida","Lentejas Pimiento",288,15,50,5,"Lentejas, Pimiento"],
-[16,"Comida","Lomo Patatas",330,39,25,6,"Lomo, Patata, Aceite"],
-[17,"Merienda","Hummus Centeno",192,6,37,2,"Pan, Hummus, Naranja"],
-[18,"Cena","Lenguado Brócoli",329,52,8,10,"Lenguado, Brócoli"],
-[19,"Comida","Arroz Anchoas",300,9,35,14,"Arroz, Anchoas, Nueces"],
-[20,"Comida","Caballa Brócoli",405,32,10,26,"Caballa, Brócoli"],
-[21,"Merienda","Bocadillo Salmón",322,9,68,2,"Pan, Salmón, Tomate"],
-[22,"Cena","Tortilla Francesa",229,9,11,16,"Huevo, Aceitunas, Tomate"],
-[23,"Desayuno","Pan Integral Almendras",657,26,95,21,"Leche, Almendras, Pan, Pavo"],
-[24,"Comida","Macarrones Tomate",137,5,27,0,"Macarrones, Tomate"],
-[25,"Cena","Pollo Rúcula",457,64,8,18,"Pollo, Rúcula, Tomate"],
-[26,"Desayuno","Pan Jamón Plátano",343,13,51,9,"Pan, Cacahuete, Plátano"],
-[27,"Comida","Garbanzos Espinacas",397,20,60,10,"Garbanzos, Espinaca"],
-[28,"Comida","Sepia Aguacate",256,21,6,17,"Sepia, Aguacate"],
-[29,"Merienda","Merienda Jamón",285,10,49,6,"Pan, Jamón, Plátano"],
-[30,"Cena","Pavo Tomate",199,28,5,7,"Pavo, Tomate, Zanahoria"],
-[31,"Desayuno","Desayuno Jamón",455,14,77,10,"Pan, Manzana, Jamón"],
-[32,"Comida","Arroz Surimi",295,4,28,20,"Arroz, Surimi, Aguacate"],
-[33,"Comida","Filete Atún Salsa",130,28,0,1,"Atún salsa"],
-[34,"Merienda","Bocadillo Salmón Fruta",289,9,50,6,"Pan, Salmón, Plátano"],
-[35,"Cena","Caballa Canónigos",383,30,6,26,"Caballa, Canónigos"],
-[36,"Desayuno","Pavo Naranja",446,26,65,9,"Naranja, Pavo, Tostada"],
-[37,"Tentempié","Plátano Almendras",316,6,56,10,"Plátano, Almendra"],
-[38,"Comida","Garbanzos Atún",606,50,64,17,"Garbanzos, Atún"],
-[39,"Comida","Pollo Maíz",280,52,0,6,"Pollo, Maíz"],
-[40,"Merienda","Fajita Salmón",122,10,0,8,"Fajita, Salmón"],
-[41,"Merienda","Plátano",178,2,46,0,"Plátano"],
-[42,"Cena","Huevos Jamón",658,49,35,35,"Huevo, Jamón, Pan"],
-[43,"Desayuno","Avena Yogur",757,30,107,22,"Avena, Plátano, Yogur"],
-[44,"Tentempié","Tortitas Guacamole",99,9,5,3,"Tortitas, Guacamole"],
-[45,"Comida","Lasaña Salmón",450,25,40,20,"Lasaña, Caballa"],
-[46,"Merienda","Leche Avena",253,11,31,8,"Leche, Avena"],
-[47,"Cena","Trucha Acelgas",317,9,43,12,"Trucha, Acelgas"],
-[48,"Comida","Alubias Sésamo",340,18,55,6,"Alubias, Sésamo"],
-[49,"Comida","Solomillo Cerdo",360,40,15,12,"Solomillo, Lechuga"],
-[50,"Cena","Dorada Tomate",682,75,51,19,"Dorada, Tomate"],
-[51,"Desayuno","Tortitas Claras",557,27,66,21,"Claras, Avena, Miel"],
-[52,"Comida","Arroz Pepino",281,5,42,10,"Arroz, Pepino"],
-[53,"Merienda","Avena Leche",358,16,44,12,"Leche, Avena"],
-[54,"Cena","Cena Huevo",426,28,39,16,"Pan, Claras, Huevo"],
-[55,"Comida","Espirales Anchoas",360,1,5,38,"Espirales, Anchoas"],
-[56,"Comida","Pavo Rúcula",279,39,6,11,"Pavo, Rúcula"],
-[57,"Cena","Pollo Pisto",466,58,34,8,"Pollo, Pisto"],
-[58,"Desayuno","Desayuno Completo 2",511,25,62,19,"Zumo, Claras, Avena"],
-[59,"Comida","Lentejas Queso",420,22,45,16,"Lentejas, Queso"],
-[60,"Comida","Lubina Acelgas",240,34,4,8,"Lubina, Acelgas"],
-[61,"Merienda","Bocadillo Bonito 2",671,6,34,57,"Pan, Bonito"],
-{i:62,t:"Cena",n:"Lomo Rúcula",k:819,p:61,c:49,f:40,d:"Pan, Rúcula, Lomo"},
-{i:63,t:"Comida",n:"Arroz Huevo",k:251,p:11,c:23,f:12,d:"Huevo, Tomate, Arroz"},
-{i:64,t:"Comida",n:"Trucha Tomate",k:61,p:0,c:3,f:5,d:"Trucha, Tomate"},
-{i:65,t:"Merienda",n:"Bocadillo Jamón",k:262,p:15,c:35,f:6,d:"Pan, Jamón, Tomate"},
-{i:66,t:"Cena",n:"Cena Berenjena",k:566,p:64,c:46,f:12,d:"Pan, Berenjena, Atún"},
-{i:67,t:"Desayuno",n:"Desayuno Pavo 2",k:400,p:24,c:61,f:7,d:"Leche, Pavo, Tostada"},
-{i:68,t:"Tentempié",n:"Yogur Plátano",k:217,p:6,c:43,f:3,d:"Yogur, Plátano"},
-{i:69,t:"Comida",n:"Pollo Tortilla",k:439,p:65,c:1,f:17,d:"Pollo, Huevo, Claras"},
-{i:70,t:"Merienda",n:"Yogur Cacahuete",k:850,p:7,c:10,f:90,d:"Yogur, Cacao, Cacahuete"},
-{i:71,t:"Cena",n:"Revuelto Caballa",k:708,p:10,c:4,f:73,d:"Huevo, Caballa, Hummus"},
-{i:72,t:"Desayuno",n:"Avena Plátano 2",k:560,p:22,c:80,f:16,d:"Leche, Plátano, Avena"},
-{i:73,t:"Comida",n:"Macarrones Salmón",k:206,p:7,c:13,f:13,d:"Macarrones, Salmón"},
-{i:74,t:"Comida",n:"Caballa Canónigos 2",k:383,p:30,c:6,f:26,d:"Caballa, Canónigos"},
-{i:75,t:"Merienda",n:"Yogur Almendras",k:1204,p:45,c:49,f:101,d:"Yogur, Almendra"},
-{i:76,t:"Cena",n:"Atún Lechuga",k:303,p:44,c:8,f:9,d:"Atún, Lechuga"},
-{i:77,t:"Tentempié",n:"Yogur Plátano 3",k:328,p:12,c:58,f:7,d:"Yogur, Plátano"},
-{i:78,t:"Comida",n:"Lentejas Queso 2",k:322,p:14,c:26,f:18,d:"Lentejas, Nuez, Queso"},
-{i:79,t:"Comida",n:"Lomo Berenjena 2",k:604,p:56,c:12,f:36,d:"Berenjena, Lomo"},
-{i:80,t:"Cena",n:"Lenguado Rúcula",k:425,p:64,c:5,f:17,d:"Lenguado, Rúcula"},
-{i:81,t:"Desayuno",n:"Tortitas Zumo 2",k:587,p:28,c:83,f:18,d:"Zumo, Claras, Avena"},
-{i:82,t:"Comida",n:"Arroz Remolacha",k:96,p:1,c:11,f:5,d:"Arroz, Remolacha"},
-{i:83,t:"Comida",n:"Atún Verduras",k:234,p:50,c:0,f:1,d:"Atún con verduras"},
-{i:84,t:"Cena",n:"Tortilla Pimientos",k:203,p:14,c:4,f:14,d:"Queso, Claras, Huevo"},
-{i:85,t:"Comida",n:"Espirales Anchoas",k:237,p:0,c:3,f:25,d:"Espirales, Anchoas"},
-{i:86,t:"Cena",n:"Pollo Pisto 2",k:280,p:52,c:0,f:6,d:"Pollo, Pisto"},
-{i:87,t:"Tentempié",n:"Tortitas Jamón",k:99,p:9,c:5,f:3,d:"Tortitas, Guacamole"},
-{i:88,t:"Comida",n:"Alubias Sésamo 2",k:142,p:6,c:16,f:5,d:"Alubias, Sésamo"},
-{i:89,t:"Comida",n:"Lubina Aguacate",k:303,p:28,c:5,f:18,d:"Lubina, Aguacate"},
-{i:90,t:"Merienda",n:"Yogur Almendras 2",k:827,p:32,c:34,f:68,d:"Yogur, Almendra"},
-{i:91,t:"Cena",n:"Lomo Lechuga 2",k:300,p:27,c:3,f:19,d:"Lomo, Lechuga"},
-{i:92,t:"Comida",n:"Arroz 3 Delicias",k:669,p:10,c:126,f:13,d:"Arroz, Trucha"},
-{i:93,t:"Cena",n:"Salmón Canónigos 2",k:325,p:25,c:6,f:20,d:"Salmón, Canónigos"},
-{i:94,t:"Desayuno",n:"Yogur Pavo",k:924,p:25,c:56,f:68,d:"Yogur, Pan, Pavo"},
-{i:95,t:"Comida",n:"Ensalada Garbanzos",k:341,p:15,c:52,f:9,d:"Garbanzos, Tomate"},
-{i:96,t:"Comida",name:"Sepia Brócoli",k:218,p:36,c:5,f:6,d:"Brócoli, Sepia"},
-{i:97,t:"Merienda",name:"Bocadillo Jamón 2",k:307,p:21,c:44,f:6,d:"Pan, Jamón"},
-{i:98,t:"Cena",name:"Sopa Pollo",k:366,p:34,c:33,f:11,d:"Sopa pollo, Pollo"},
-{i:99,t:"Desayuno",name:"Desayuno Completo 3",k:381,p:19,c:63,f:6,d:"Leche, Plátano, Jamón"},
-{i:100,t:"Comida",name:"Arroz Atún",k:348,p:18,c:45,f:10,d:"Arroz, Atún, Huevo"},
-{i:101,t:"Cena",name:"Tortilla Patatas",k:340,p:14,c:25,f:20,d:"Huevo, Patata"},
-{i:102,t:"Desayuno",name:"Avena Plátano 3",k:296,p:13,c:49,f:6,d:"Leche, Avena, Plátano"},
-{i:103,t:"Comida",name:"Lentejas Arroz",k:312,p:12,c:55,f:5,d:"Lentejas, Arroz"},
-{i:104,t:"Merienda",name:"Papilla Arroz",k:380,p:30,c:60,f:2,d:"Harina arroz, Proteína"},
-{i:105,t:"Cena",name:"Merluza Horno",k:235,p:20,c:25,f:6,d:"Merluza, Patata"},
-{i:106,t:"Desayuno",name:"Pan Aguacate",k:285,p:12,c:25,f:15,d:"Pan, Aguacate, Pavo"},
-{id:107,t:"Tentempié",n:"Pan Huevo",k:403,p:18,c:39,f:19,d:"Pan, Aguacate, Huevo"},
-{id:108,t:"Comida",n:"Pollo Curry",k:410,p:35,c:45,f:10,d:"Pollo, Arroz, Coco"},
-{id:109,t:"Merienda",n:"Plátano Pan Wasa",k:337,p:6,c:55,f:12,d:"Plátano, Pan, Aguacate"},
-{id:110,t:"Cena",n:"Ensalada Atún",k:290,p:25,c:5,f:18,d:"Lechuga, Atún, Huevo"},
-{id:111,t:"Comida",n:"Guisantes Atún",k:606,p:50,c:64,f:17,d:"Guisantes, Tomate, Atún"},
-{id:112,t:"Merienda",n:"Leche Avena 2",k:253,p:11,c:31,f:8,d:"Leche, Avena"},
-{id:113,t:"Cena",n:"Trucha Acelgas 2",k:317,p:9,c:43,f:12,d:"Pan, Trucha, Acelgas"},
-{id:114,t:"Comida",n:"Solomillo Cerdo 2",k:765,p:69,c:17,f:45,d:"Solomillo, Lechuga"},
-{id:115,t:"Cena",n:"Dorada Tomate 2",k:682,p:75,c:51,f:19,d:"Dorada, Tomate"},
-{id:116,t:"Desayuno",n:"Tortitas Zumo 4",k:557,p:27,c:66,f:21,d:"Leche, Zumo, Claras"},
-{id:117,t:"Comida",n:"Lentejas Queso 3",k:522,p:24,c:44,f:29,d:"Lentejas, Nuez, Queso"},
-{id:118,t:"Comida",n:"Lubina Acelgas 2",k:240,p:34,c:4,f:8,d:"Lubina, Acelgas"},
-{id:119,t:"Merienda",n:"Bocadillo Bonito 3",k:671,p:6,c:34,f:57,d:"Pan, Bonito"},
-{id:120,t:"Cena",n:"Lomo Rúcula 2",k:819,p:61,c:49,f:40,d:"Lomo, Rúcula"},
-{id:121,t:"Comida",n:"Arroz Huevo 2",k:251,p:11,c:23,f:12,d:"Arroz, Huevo"},
-{id:122,t:"Comida",n:"Espirales Anchoas 3",k:237,p:0,c:3,f:25,d:"Espirales, Anchoas"},
-{id:123,t:"Comida",n:"Pavo Rúcula 2",k:279,p:39,c:6,f:11,d:"Pavo, Rúcula"},
-{id:124,t:"Cena",n:"Pollo Pisto 3",k:466,p:58,c:34,f:8,d:"Pollo, Pisto"},
-{id:125,t:"Desayuno",n:"Desayuno Pavo 4",k:511,p:25,c:62,f:19,d:"Leche, Zumo, Claras"},
-{id:126,t:"Desayuno",n:"Avena Yogur 5",k:693,p:27,c:84,f:28,d:"Leche, Yogur, Avena"},
-{id:127,t:"Tentempié",n:"Tostada Jamón 2",k:386,p:23,c:52,f:8,d:"Pan, Tomate, Jamón"},
-{id:128,t:"Comida",n:"Macarrones Surimi 2",k:115,p:2,c:14,f:5,d:"Macarrones, Surimi"},
-{id:129,t:"Comida",n:"Caballa Acelgas 2",k:373,p:30,c:4,f:26,d:"Caballa, Acelgas"},
-{id:130,t:"Merienda",n:"Yogur Frutos Secos 2",k:982,p:23,c:25,f:94,d:"Yogur, Nuez, Pistacho"},
-{id:131,t:"Cena",n:"Lenguado Brócoli 2",k:436,p:67,c:10,f:15,d:"Lenguado, Brócoli"},
-{id:132,t:"Comida",n:"Arroz Salmón 2",k:647,p:41,c:43,f:32,d:"Arroz, Salmón"},
-{id:133,t:"Cena",n:"Tortilla Espinacas 2",k:241,p:22,c:5,f:14,d:"Huevo, Espinaca"},
-{id:134,t:"Desayuno",n:"Desayuno Aguacate 2",k:253,p:11,c:29,f:9,d:"Leche, Pan, Aguacate"},
-{id:135,t:"Comida",n:"Pavo Maíz 2",k:201,p:28,c:5,f:7,d:"Pavo, Guisantes, Maíz"},
-{id:136,t:"Cena",n:"Pavo Champiñones 2",k:175,p:27,c:0,f:7,d:"Pavo, Champiñón"},
-{id:137,t:"Comida",n:"Arroz Remolacha 3",k:96,p:1,c:11,f:5,d:"Arroz, Remolacha"},
-{id:138,t:"Comida",n:"Atún Verduras 3",k:234,p:50,c:0,f:1,d:"Atún, Verduras"},
-{id:139,t:"Cena",n:"Tortilla Pimientos 2",k:203,p:14,c:4,f:14,d:"Queso, Claras, Huevo"},
-{id:140,t:"Comida",n:"Espirales Anchoas 4",k:237,p:0,c:3,f:25,d:"Espirales, Anchoas"},
-{id:141,t:"Cena",n:"Pollo Pisto 4",k:280,p:52,c:0,f:6,d:"Pollo, Pisto"},
-{id:142,t:"Tentempié",n:"Tortitas Guacamole 3",k:99,p:9,c:5,f:3,d:"Tortitas, Guacamole"},
-{id:143,t:"Comida",n:"Alubias Sésamo 3",k:142,p:6,c:16,f:5,d:"Alubias, Sésamo"},
-{id:144,t:"Comida",n:"Lubina Aguacate 3",k:303,p:28,c:5,f:18,d:"Lubina, Aguacate"},
-{id:145,t:"Merienda",n:"Yogur Almendras 4",k:827,p:32,c:34,f:68,d:"Yogur, Almendra"},
-{id:146,t:"Cena",n:"Lomo Lechuga 4",k:300,p:27,c:3,f:19,d:"Lomo, Lechuga"},
-{id:147,t:"Comida",n:"Arroz 3 Delicias 2",k:669,p:10,c:126,f:13,d:"Arroz, Trucha"},
-{id:148,t:"Cena",n:"Salmón Canónigos 2",k:325,p:25,c:6,f:20,d:"Salmón, Canónigos"},
-{id:149,t:"Desayuno",n:"Yogur Pavo 2",k:924,p:25,c:56,f:68,d:"Yogur, Nuez, Pan"},
-{id:150,t:"Comida",n:"Ensalada Garbanzos 2",k:341,p:15,c:52,f:9,d:"Garbanzos, Tomate"},
-{id:151,t:"Comida",name:"Sepia Brócoli 2",k:218,p:36,c:5,f:6,d:"Brócoli, Sepia"},
-{id:152,t:"Merienda",name:"Merienda Jamón 3",k:307,p:21,c:44,f:6,d:"Pan, Jamón"},
-{id:153,t:"Cena",name:"Sopa Pollo 2",k:366,p:34,c:33,f:11,d:"Sopa, Pollo"},
-{id:154,t:"Desayuno",name:"Tortilla 4 Huevos",k:450,p:35,c:5,f:30,d:"Huevos, Jamón, Queso"},
-{id:155,t:"Desayuno",name:"Ricotta Mango",k:380,p:25,c:30,f:18,d:"Ricotta, Mango"},
-{id:156,t:"Desayuno",name:"Pan Jamón Queso 3",k:320,p:15,c:40,f:10,d:"Pan, Jamón, Queso"},
-{id:157,t:"Tentempié",name:"Papilla Arroz 2",k:380,p:30,c:60,f:2,d:"Harina arroz, Proteína"},
-{id:158,t:"Merienda",name:"Puré Verduras",k:350,p:25,c:30,f:15,d:"Puré, Boquerones"},
-{id:159,t:"Comida",name:"Pollo Almendras",k:550,p:45,c:20,f:30,d:"Pollo, Almendras"},
-{id:160,t:"Comida",name:"Ensalada Pasta 2",k:420,p:30,c:55,f:10,d:"Pasta, Langostinos"},
-{id:161,t:"Comida",name:"Patata Ternera",k:600,p:40,c:60,f:20,d:"Patata, Ternera"},
-{id:162,t:"Comida",name:"Zanahoria Atún",k:350,p:35,c:30,f:10,d:"Zanahoria, Atún"},
-{id:163,t:"Cena",name:"Sepia Arroz",k:420,p:35,c:45,f:8,d:"Sepia, Arroz"},
-{id:164,t:"Cena",name:"Atún Boniato",k:350,p:30,c:35,f:10,d:"Atún, Boniato"},
-{id:165,t:"Desayuno",name:"Batido Detox",k:180,p:2,c:35,f:1,d:"Espinacas, Manzana"},
-{id:166,t:"Comida",name:"Quinoa Verduras",k:320,p:10,c:50,f:8,d:"Quinoa, Pimiento"},
-{id:167,t:"Cena",name:"Crema Calabaza",k:150,p:3,c:25,f:5,d:"Calabaza, Patata"},
-{id:168,t:"Desayuno",name:"Tostadas Francesas",k:350,p:20,c:40,f:10,d:"Pan, Huevo, Leche"},
-{id:169,t:"Comida",name:"Hamburguesa Ternera",k:450,p:35,c:30,f:20,d:"Ternera, Pan"},
-{id:170,t:"Cena",name:"Pizza Coliflor",k:380,p:25,c:15,f:20,d:"Coliflor, Huevo"},
-{id:171,t:"Desayuno",name:"Tortilla Avena Dulce",k:320,p:15,c:45,f:8,d:"Claras, Avena"},
-{id:172,t:"Comida",name:"Fajitas Pollo",k:480,p:35,c:50,f:12,d:"Tortillas, Pollo"},
-{id:173,t:"Cena",name:"Brochetas Pavo",k:220,p:30,c:10,f:6,d:"Pavo, Verduras"},
-{id:174,t:"Merienda",name:"Requesón Miel",k:210,p:12,c:15,f:10,d:"Requesón, Miel"},
-{id:175,t:"Desayuno",name:"Smoothie Frutos Rojos",k:300,p:10,c:50,f:5,d:"Frutos rojos, Yogur"},
-{id:176,t:"Comida",name:"Pote Gallego",k:420,p:20,c:45,f:15,d:"Alubias, Patata"},
-{id:177,t:"Cena",name:"Carpaccio Ternera",k:250,p:30,c:2,f:12,d:"Ternera, Parmesano"},
-{id:178,t:"Desayuno",name:"Galletas Avena",k:280,p:6,c:50,f:4,d:"Avena, Plátano"},
-{id:179,t:"Comida",name:"Paella Marisco",k:550,p:30,c:70,f:15,d:"Arroz, Gambas"},
-{id:180,t:"Cena",name:"Sushi Variado",k:400,p:20,c:60,f:5,d:"Arroz, Salmón"},
-{id:181,t:"Merienda",name:"Manzana Asada",k:120,p:1,c:28,f:0,d:"Manzana, Canela"},
-{id:182,t:"Desayuno",name:"Tostada Salada",k:340,p:18,c:30,f:15,d:"Pan, Huevo"},
-{id:183,t:"Comida",name:"Cuscús Verduras",k:400,p:15,c:65,f:8,d:"Cuscús, Garbanzos"},
-{id:184,t:"Cena",name:"Huevos Tomate",k:310,p:18,c:10,f:20,d:"Huevos, Tomate"},
-{id:185,t:"Desayuno",name:"Chía Pudding",k:260,p:8,c:25,f:12,d:"Chía, Leche coco"},
-{id:186,t:"Comida",name:"Berenjenas Rellenas",k:380,p:25,c:15,f:22,d:"Berenjena, Carne"},
-{id:187,t:"Cena",name:"Wok Tofu",k:290,p:15,c:20,f:15,d:"Tofu, Verduras"},
-{id:188,t:"Merienda",name:"Kéfir Semillas",k:160,p:10,c:12,f:6,d:"Kéfir, Pipas"},
-{id:189,t:"Desayuno",name:"Mug Cake",k:220,p:15,c:20,f:8,d:"Huevo, Avena"},
-{id:190,t:"Comida",name:"Canelones Espinacas",k:480,p:20,c:55,f:18,d:"Canelones, Espinacas"},
-{id:191,t:"Cena",name:"Gambas Ajillo",k:250,p:35,c:2,f:10,d:"Gambas, Ajo"},
-{id:192,t:"Desayuno",name:"Tostada Cacahuete",k:380,p:14,c:35,f:20,d:"Pan, Cacahuete"},
-{id:193,t:"Comida",name:"Estofado Pavo",k:410,p:30,c:40,f:12,d:"Pavo, Patata"},
-{id:194,t:"Cena",name:"Ensalada Caprese",k:320,p:15,c:5,f:25,d:"Tomate, Mozzarella"},
-{id:195,t:"Merienda",name:"Compota Manzana",k:110,p:0,c:25,f:0,d:"Manzana"},
-{id:196,t:"Desayuno",name:"Huevos Benedictine",k:360,p:20,c:25,f:18,d:"Huevo, Pan"},
-{id:197,t:"Comida",name:"Fideos Chinos",k:450,p:30,c:55,f:10,d:"Fideos, Pollo"},
-{id:198,t:"Cena",name:"Tataki Atún",k:300,p:40,c:2,f:12,d:"Atún, Soja"},
-{id:199,t:"Desayuno",name:"Açai Bowl",k:380,p:8,c:60,f:12,d:"Açai, Plátano"},
-{id:200,t:"Comida",name:"Risotto Setas",k:520,p:12,c:70,f:20,d:"Arroz, Setas"},
-{id:201,t:"Cena",name:"Rollitos Vietnamitas",k:280,p:15,c:40,f:5,d:"Papel arroz, Gambas"},
-{id:202,t:"Merienda",name:"Edamame",k:120,p:11,c:9,f:5,d:"Edamame, Sal"},
-{id:203,t:"Desayuno",name:"Gofres Avena",k:310,p:12,c:45,f:8,d:"Harina avena, Huevo"},
-{id:204,t:"Comida",name:"Muslos Pollo",k:480,p:35,c:25,f:25,d:"Muslos, Patata"},
-{id:205,t:"Cena",name:"Crema Espinacas",k:180,p:8,c:15,f:8,d:"Espinacas, Patata"},
-{id:206,t:"Desayuno",name:"Tostada Ricota",k:290,p:10,c:35,f:10,d:"Pan, Ricota"},
-{id:207,t:"Comida",name:"Bacalao Pisto",k:350,p:35,c:15,f:15,d:"Bacalao, Pisto"},
-{id:208,t:"Cena",name:"Ensalada Ahumados",k:320,p:25,c:5,f:20,d:"Lechuga, Salmón"},
-{id:209,t:"Merienda",name:"Gelatina",k:80,p:2,c:18,f:0,d:"Gelatina, Fruta"},
-{id:210,t:"Desayuno",name:"Tortilla Patata Fit",k:350,p:20,c:30,f:15,d:"Huevo, Patata"},
-{id:211,t:"Comida",name:"Albóndigas",k:480,p:30,c:35,f:22,d:"Carne, Guisantes"},
-{id:212,t:"Cena",name:"Pulpo Gallega",k:350,p:30,c:20,f:15,d:"Pulpo, Patata"},
-{id:213,t:"Desayuno",name:"Cereales Leche",k:280,p:10,c:50,f:4,d:"Copos maíz, Leche"},
-{id:214,t:"Comida",name:"Pasta Setas",k:450,p:15,c:65,f:12,d:"Pasta, Setas"},
-{id:215,t:"Cena",name:"Sandwich Vegetal",k:320,p:15,c:30,f:14,d:"Pan, Huevo"},
-{id:216,t:"Merienda",name:"Zanahoria Hummus",k:150,p:5,c:15,f:8,d:"Zanahoria, Hummus"},
-{id:217,t:"Desayuno",name:"Crepes Avena",k:320,p:12,c:45,f:8,d:"Avena, Leche"},
-{id:218,t:"Comida",name:"Guiso Sepia",k:380,p:30,c:40,f:10,d:"Sepia, Patata"},
-{id:219,t:"Cena",name:"Champiñones Rellenos",k:220,p:20,c:5,f:12,d:"Champiñón, Jamón"},
-{id:220,t:"Desayuno",name:"Tostada Mermelada",k:250,p:10,c:35,f:6,d:"Pan, Queso"},
-{id:221,t:"Comida",name:"Arroz Negro",k:500,p:25,c:65,f:14,d:"Arroz, Calamares"},
-{id:222,t:"Cena",name:"Ensalada Espinacas",k:280,p:8,c:15,f:20,d:"Espinacas, Fresas"},
-{id:223,t:"Merienda",name:"Zumo Verde",k:120,p:2,c:25,f:0,d:"Manzana, Apio"},
-{id:224,t:"Desayuno",name:"Pan Tumaca",k:320,p:15,c:30,f:14,d:"Pan, Tomate"},
-{id:225,t:"Comida",name:"Espaguetis Carbonara",k:480,p:25,c:60,f:15,d:"Espaguetis, Huevo"},
-{id:226,t:"Cena",name:"Brócoli Gratinado",k:250,p:15,c:10,f:15,d:"Brócoli, Queso"},
-{id:227,t:"Desayuno",name:"Yogur Muesli",k:280,p:10,c:40,f:8,d:"Yogur, Muesli"},
-{id:228,t:"Comida",name:"Conejo Ajillo",k:400,p:45,c:5,f:20,d:"Conejo, Ajo"},
-{id:229,t:"Cena",name:"Sopa Juliana",k:150,p:5,c:20,f:5,d:"Verduras"},
-{id:230,t:"Merienda",name:"Tostada Tahini",k:220,p:6,c:25,f:10,d:"Pan, Tahini"},
-{id:231,t:"Desayuno",name:"Revuelto Champiñones",k:250,p:18,c:2,f:18,d:"Huevos, Champiñones"},
-{id:232,t:"Comida",name:"Lentejas Chorizo",k:600,p:30,c:50,f:28,d:"Lentejas, Chorizo"},
-{id:233,t:"Cena",name:"Ensalada Griega",k:300,p:10,c:10,f:22,d:"Tomate, Pepino"},
-{id:234,t:"Desayuno",name:"Batido Avena",k:280,p:10,c:45,f:5,d:"Leche, Avena"},
-{id:235,t:"Comida",name:"Pollo Limón",k:420,p:40,c:15,f:20,d:"Pollo, Limón"},
-{id:236,t:"Cena",name:"Carpaccio Calabacín",k:180,p:5,c:10,f:12,d:"Calabacín, Parmesano"},
-{id:237,t:"Tentempié",name:"Manzana",k:70,p:0,c:19,f:0,d:"Manzana (150g)"},
-{id:238,t:"Tentempié",name:"Nueces",k:180,p:4,c:4,f:18,d:"Nueces (25g)"},
-{id:239,t:"Tentempié",name:"Almendras",k:160,p:6,c:6,f:14,d:"Almendras (25g)"},
-{id:240,t:"Tentempié",name:"Barrita Proteína",k:200,p:20,c:15,f:6,d:"Barrita comercial"},
-{id:241,t:"Tentempié",name:"Huevo Duro",k:70,p:6,c:0,f:5,d:"Huevo L"},
-{id:242,t:"Tentempié",name:"Tortitas Arroz",k:30,p:1,c:6,f:0,d:"1 tortita"},
-{id:243,t:"Tentempié",name:"Jamón Serrano",k:120,p:15,c:0,f:6,d:"50g Jamón"},
-{id:244,t:"Tentempié",name:"Lata Atún Natural",k:56,p:13,c:0,f:0,d:"Lata pequeña"},
-{id:245,t:"Tentempié",name:"Queso Fresco",k:70,p:8,c:2,f:3,d:"Tarrina pequeña"}
-];
+// --- ESTADO ---
+let state = { day:'Lunes', cat:'Desayuno', plan:{}, targets:{} };
+const DAYS = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
 
-// STATE
-let curDay="Lunes", curCat="Desayuno", plan={}, targets={};
-const days=["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
-
-// INIT
+// --- INIT ---
 window.onload = function() {
-    days.forEach(d=>{if(!plan[d])plan[d]=[]});
-    const t=localStorage.getItem('m_tgts'), p=localStorage.getItem('m_plan');
-    if(t) targets=JSON.parse(t); else calc();
-    if(p) plan=JSON.parse(p);
-    renderGrid(); renderLib(); renderPlan();
+    if(typeof foodDB === 'undefined') {
+        alert("⚠️ ERROR: No se ha encontrado la base de datos. Asegúrate de tener el archivo 'data.js' en la misma carpeta.");
+        return;
+    }
+    DAYS.forEach(d=>{ if(!state.plan[d]) state.plan[d]=[] });
+    try {
+        const t=localStorage.getItem('mf_targets_v4');
+        const p=localStorage.getItem('mf_plan_v4');
+        if(t) state.targets=JSON.parse(t); else calc();
+        if(p) state.plan=JSON.parse(p);
+    } catch(e){ calc(); }
+    renderTabs(); renderPlan(); renderLib();
 }
 
-// LOGIC
+// --- LOGICA ---
 function calc() {
-    const w=parseFloat(document.getElementById('w').value), h=parseFloat(document.getElementById('h').value), a=parseFloat(document.getElementById('a').value), s=document.getElementById('s').value, act=parseFloat(document.getElementById('act').value), goal=parseFloat(document.getElementById('goal').value);
+    const w=parseFloat(document.getElementById('w').value)||80, h=parseFloat(document.getElementById('h').value)||180, a=parseFloat(document.getElementById('a').value)||30, act=parseFloat(document.getElementById('act').value)||1.55, goal=parseFloat(document.getElementById('goal').value)||0;
+    const s=document.getElementById('s').value;
     let bmr = (s==='m') ? 88.362+(13.397*w)+(4.799*h)-(5.677*a) : 447.593+(9.247*w)+(3.098*h)-(4.330*a);
     const k=Math.round(bmr*act*(1+goal)), p=Math.round(w*2), f=Math.round(w*0.9), c=Math.round((k-p*4-f*9)/4);
-    days.forEach(d=>targets[d]={k,p,c,f});
+    DAYS.forEach(d=>state.targets[d]={k,p,c,f});
     saveT(); renderGrid();
 }
 
 function renderGrid() {
     const g=document.getElementById('grid-days'); g.innerHTML='';
-    days.forEach(d=>{
-        const t=targets[d]||{k:2500,p:160,c:300,f:70};
-        g.innerHTML+=`<div class="g-row"><div style="font-size:10px;font-weight:700">${d.substring(0,3)}</div><div class="g-cell"><input type="number" id="k-${d}" value="${t.k}" onchange="updT('${d}')"></div><div class="g-cell"><input type="number" id="p-${d}" value="${t.p}" onchange="updT('${d}')" style="color:var(--bad)"></div><div class="g-cell"><input type="number" id="c-${d}" value="${t.c}" onchange="updT('${d}')" style="color:var(--warn)"></div><div class="g-cell"><input type="number" id="f-${d}" value="${t.f}" onchange="updT('${d}')" style="color:var(--ok)"></div></div>`;
+    g.innerHTML += `<div class="g-row"><span style="font-size:10px">DÍA</span><span style="font-size:10px;text-align:center">KC</span><span style="font-size:10px;text-align:center;color:var(--bad)">P</span><span style="font-size:10px;text-align:center;color:var(--warn)">C</span><span style="font-size:10px;text-align:center;color:var(--ok)">G</span></div>`;
+    DAYS.forEach(d=>{
+        const t=state.targets[d]||{k:2500,p:160,c:300,f:70};
+        g.innerHTML+=`<div class="g-row"><span style="font-size:11px;font-weight:700">${d.substr(0,3)}</span><input type="number" id="k_${d}" value="${t.k}" class="g-inp"><input type="number" id="p_${d}" value="${t.p}" class="g-inp" style="color:var(--bad)"><input type="number" id="c_${d}" value="${t.c}" class="g-inp" style="color:var(--warn)"><input type="number" id="f_${d}" value="${t.f}" class="g-inp" style="color:var(--ok)"></div>`;
     });
 }
 
-function updT(d) {
-    targets[d]={k:parseInt(document.getElementById(`k-${d}`).value),p:parseInt(document.getElementById(`p-${d}`).value),c:parseInt(document.getElementById(`c-${d}`).value),f:parseInt(document.getElementById(`f-${d}`).value)};
-    saveT(); renderPlan();
+function saveTargets() {
+    DAYS.forEach(d=>{
+        state.targets[d]={k:parseInt(document.getElementById(`k_${d}`).value),p:parseInt(document.getElementById(`p_${d}`).value),c:parseInt(document.getElementById(`c_${d}`).value),f:parseInt(document.getElementById(`f_${d}`).value)};
+    });
+    saveT(); toggleModal(false); renderPlan();
 }
 
-function saveT() { localStorage.setItem('m_tgts',JSON.stringify(targets)); }
-function saveP() { localStorage.setItem('m_plan',JSON.stringify(plan)); }
+function saveT(){ localStorage.setItem('mf_targets_v4',JSON.stringify(state.targets)); }
+function saveP(){ localStorage.setItem('mf_plan_v4',JSON.stringify(state.plan)); }
 
-function nav(v,el) {
-    document.querySelectorAll('.view').forEach(x=>x.classList.add('hide'));
-    document.getElementById(v).classList.remove('hide');
-    document.querySelectorAll('.n-item').forEach(x=>x.classList.remove('active'));
-    el.classList.add('active');
+function renderTabs() {
+    const c=document.getElementById('day-tabs'); c.innerHTML='';
+    DAYS.forEach(d=>c.innerHTML+=`<div class="day-pill ${state.day===d?'active':''}" onclick="setDay('${d}',this)">${d}</div>`);
 }
 
-function setDay(d,el) { curDay=d; document.querySelectorAll('.pill').forEach(x=>x.classList.remove('active')); el.classList.add('active'); renderPlan(); }
-function setCat(c,el) { curCat=c; document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active')); el.classList.add('active'); renderLib(); }
+function setDay(d,el) { state.day=d; document.querySelectorAll('.day-pill').forEach(x=>x.classList.remove('active')); el.classList.add('active'); renderPlan(); }
+function setCat(c,el) { state.cat=c; document.querySelectorAll('.tag').forEach(x=>x.classList.remove('active')); el.classList.add('active'); renderLib(); }
+function go(v,btn) { document.querySelectorAll('.view').forEach(x=>x.classList.remove('active')); document.getElementById(v).classList.add('active'); document.querySelectorAll('.n-btn').forEach(x=>x.classList.remove('active')); btn.classList.add('active'); }
+function toggleModal(s) { document.getElementById('modal').style.display=s?'flex':'none'; if(s) renderGrid(); }
 
 function renderLib() {
     const l=document.getElementById('lib-list'), s=document.getElementById('search').value.toLowerCase();
     l.innerHTML='';
-    db.filter(x=>{
-        let m = x.t===curCat;
-        if(curCat==='Tentempié' && (x.t.includes('Mañana')||x.t.includes('M.MAÑANA'))) m=true;
-        return m && (x.n.toLowerCase().includes(s)||x.d.toLowerCase().includes(s));
-    }).forEach(x=>{
-        l.innerHTML+=`<div class="card"><div class="c-head">${x.t}</div><div class="c-name">${x.n}</div><div class="c-det">🔥${x.k} P${x.p} C${x.c} F${x.f}</div><div class="c-ing">${x.d}</div><button class="act add" onclick="add(${x.i})">+</button></div>`;
+    const filtered = foodDB.filter(x => {
+        let m = x.t === state.cat;
+        if(state.cat==='Tentempié' && (x.t.includes('Mañana')||x.t.includes('M.MAÑANA'))) m=true;
+        return m && (x.n.toLowerCase().includes(s) || x.d.toLowerCase().includes(s));
+    });
+    filtered.forEach(x=>{
+        l.innerHTML+=`<div class="item"><div class="i-cat">${x.t}</div><div class="i-name">${x.n}</div><div class="i-meta">🔥${x.k} P${x.p} C${x.c} F${x.f}</div><div class="i-ing">${x.d}</div><button class="act add" onclick="add(${x.i})">+</button></div>`;
     });
 }
-
-function add(id) { plan[curDay].push(db.find(x=>x.i===id)); saveP(); renderPlan(); }
-function del(i) { plan[curDay].splice(i,1); saveP(); renderPlan(); }
 
 function renderPlan() {
-    const l=document.getElementById('plist'); l.innerHTML='';
+    const l=document.getElementById('plan-list'); l.innerHTML='';
     let tot={k:0,p:0,c:0,f:0};
-    (plan[curDay]||[]).forEach((x,i)=>{
+    (state.plan[state.day]||[]).forEach((x,i)=>{
         tot.k+=x.k; tot.p+=x.p; tot.c+=x.c; tot.f+=x.f;
-        l.innerHTML+=`<div class="card"><div class="c-head">${x.t}</div><div class="c-name">${x.n}</div><div class="c-det">🔥${x.k} P${x.p} C${x.c} F${x.f}</div><button class="act del" onclick="del(${i})">×</button></div>`;
+        l.innerHTML+=`<div class="item"><div class="i-cat">${x.t}</div><div class="i-name">${x.n}</div><div class="i-meta">🔥${x.k} P${x.p} C${x.c} F${x.f}</div><button class="act del" onclick="del(${i})">×</button></div>`;
     });
-    const t=targets[curDay]||{k:2500,p:160,c:300,f:70};
-    document.getElementById('vk').innerText=`${tot.k}/${t.k}`; document.getElementById('bk').style.width=Math.min((tot.k/t.k)*100,100)+'%';
-    document.getElementById('vp').innerText=`${tot.p}/${t.p}g`; document.getElementById('bp').style.width=Math.min((tot.p/t.p)*100,100)+'%';
-    document.getElementById('vc').innerText=`${tot.c}/${t.c}g`; document.getElementById('bc').style.width=Math.min((tot.c/t.c)*100,100)+'%';
-    document.getElementById('vf').innerText=`${tot.f}/${t.f}g`; document.getElementById('bf').style.width=Math.min((tot.f/t.f)*100,100)+'%';
+    const t=state.targets[state.day]||{k:2500,p:160,c:300,f:70};
+    updB('k',tot.k,t.k); updB('p',tot.p,t.p); updB('c',tot.c,t.c); updB('f',tot.f,t.f);
 }
 
-function toggleModal(show) { document.getElementById('modal').style.display=show?'flex':'none'; if(show) renderGrid(); }
+function updB(k,v,m) { document.getElementById('d'+k).innerText=`${v}/${m}`; document.getElementById('b'+k).style.width=Math.min((v/m)*100,100)+'%'; }
+function add(id) { state.plan[state.day].push(foodDB.find(x=>x.i===id)); saveP(); renderPlan(); }
+function del(i) { state.plan[state.day].splice(i,1); saveP(); renderPlan(); }
 </script>
 </body>
 </html>
